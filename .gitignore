@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# mypy
+.vscode
+.idea
+.DS_Store
+/migrations
+/config/dev.ini
+/logs/*.log
