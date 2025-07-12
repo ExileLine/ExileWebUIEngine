@@ -12,7 +12,7 @@ from typing import Union, Optional, List
 from platform import system
 
 from playwright.async_api import Browser, FrameLocator, ElementHandle
-from playwright.async_api import async_playwright, Playwright
+from playwright.async_api import async_playwright
 
 
 class ExileWebUIEngine:
@@ -40,31 +40,31 @@ class ExileWebUIEngine:
         :param init_url: 浏览器初始页面地址
         :param width: 浏览器初始宽
         :param height: 浏览器初始高
-        :param listening_api: 监听的`api`或页面`path`
+        :param listening_api: 监听的`api`或页面`path`存储对应的出入参数据 例如: ["/api/login", "/order_list", ...]
         """
         self.is_debug = is_debug
         self.headless = headless
         self.debugger_address = debugger_address
         self.debugger_address_url = debugger_address_url
-        self.playwright = None
-        self.browser: Union[Browser, None] = None
-        self.context = None
-        self.page = None
-        self.page_list = []
-        self.page_list_len = None
-        self.page_obj_list = []  # [{'index': 0, 'title': 'GitHub', 'url': 'https://github.com/'}...]
+        self.playwright = None  # playwright实例
+        self.browser: Union[Browser, None] = None  # 浏览器实例
+        self.context = None  # 上下文实例
+        self.page = None  # 页签实例, 通过`self.context`切换
+        self.page_list = []  # 页签实例列表, 用于记录索引切换
+        self.page_list_len = None  # 页签实例列表长度
+        self.page_obj_list = []  # 页签实例对象列表: [{'index': 0, 'title': 'GitHub', 'url': 'https://github.com/'}...]
         self.browser_type = browser_type
         self.init_url = init_url
         self.width = width
         self.height = height
-
         self.listening_api = listening_api
 
-        # 存储所有API请求与响应
-        self.api_requests = []
-        self.api_responses = []
+        # 存储所有API请求与响应, 配合`listening_api`使用
+        self.api_requests = []  # 被监听api请求参数
+        self.api_responses = []  # 被监听api响应参数
         self.cookies = []
 
+        # 启动浏览器命令, 结合 `self.debugger_address`
         # MACOS: /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
         # MACOS: /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile
         # Windows: ...
@@ -362,6 +362,30 @@ class ExileWebUIEngine:
 
         await self.stop()
 
+    async def test_github(self):
+        """test_github"""
+
+        await self.start()
+
+        await self.action_click(
+            t="xpath",
+            element="""/html/body/div[1]/div[1]/header/div/div[2]/div/div/qbsearch-input/div[1]/button"""
+        )
+        await self.action_input(
+            t="xpath",
+            element="""//*[@id="query-builder-test"]""",
+            value="Flask_BestPractices"
+        )
+
+        await self.page.keyboard.press("Enter")
+
+        await self.action_click(
+            t="xpath",
+            element="""/html/body/div[1]/div[4]/main/react-app/div/div/div[1]/div/div/div[2]/div/div/div[1]/div[4]/div/div/div[1]/div/div[2]/div/a/span"""
+        )
+
+        await self.stop()
+
 
 if __name__ == '__main__':
     # engine = ExileWebUIEngine(
@@ -370,6 +394,13 @@ if __name__ == '__main__':
     #     init_url="https://www.metatuple.com/"
     # )
     # asyncio.run(engine.test())
+
+    # engine = ExileWebUIEngine(
+    #     is_debug=True,
+    #     headless=False,
+    #     init_url="https://github.com/yangyuexiong",
+    # )
+    # asyncio.run(engine.test_github())
 
     engine = ExileWebUIEngine(
         is_debug=True,
