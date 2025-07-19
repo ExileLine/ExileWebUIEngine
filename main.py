@@ -247,12 +247,13 @@ class ExileWebUIEngine:
     async def check_element(self, element: str):
         """检查元素"""
 
-    async def action_input(self, t: str, element: str, value: str):
+    async def action_input(self, t: str, element: str, value: str, message: str = None):
         """
         输入
         :param t: 元素类型 XPATH, CSS, ...
         :param element: 元素值
         :param value:   输入值
+        :param message: 打印消息
         :return:
         """
 
@@ -263,7 +264,10 @@ class ExileWebUIEngine:
         else:
             await self.page.fill(element, value)
 
-    async def action_click(self, t: str, element: str):
+        if message:
+            await self.out_logs(message)
+
+    async def action_click(self, t: str, element: str, message: str = None):
         """点击"""
 
         await self.check_element(element)
@@ -272,6 +276,9 @@ class ExileWebUIEngine:
             await self.page.click(f"xpath={element}")
         else:
             await self.page.click(element)
+
+        if message:
+            await self.out_logs(message)
 
     async def test(self):
         """test"""
